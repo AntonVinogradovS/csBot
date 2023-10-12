@@ -1,0 +1,3 @@
+TOKEN = "6403608417:AAEeUCrM2J3iI6xNS_a5UYgPkfWuPa9qTos"
+CHANNEL_USERNAME = "@demoVinAn"
+#CHANNEL_USERNAME = "@eatgamesleep"
