@@ -12,6 +12,7 @@ import random
 from datetime import datetime, timedelta
 import pytz 
 
+
 async def cmdStart(message: types.Message):
     
     user_id = message.from_user.id
@@ -36,7 +37,7 @@ async def cmdStart(message: types.Message):
         referral_token = 0
     checkInDB = await get_user_by_id(message.from_user.id)
     if checkInDB == None:
-        await add_user(user_id, referral_token, 1, 0, 0)
+        await add_user(user_id, referral_token, 1, 0, 0, 1, 0)
     # if referral_token:
     #     referred_by_user_id = get_user_id_by_referral_token(referral_token)  # Функция, которая находит пользователя, который пригласил
     #     if referred_by_user_id:
@@ -86,9 +87,18 @@ async def inputUrlCheck(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     text = message.text
     '''Вставить переадресацию в личку админу'''
-    admin_id = user_id
-    
-    checkinfo = await get_user_by_id(user_id)
+    admin_id = 5776030599
+    #5776030599
+    try:
+        checkinfo = await get_user_by_id(user_id)
+    except:
+        await message.answer("Произошла ошибка. Перезапустите бота")
+        await state.finish()
+        return
+    if checkinfo == None:
+        await message.answer("Произошла ошибка. Перезапустите бота")
+        await state.finish()
+        return
     if checkinfo[2] != 0:    
         if re.match(r'https?://', text):
             random_number = random.randint(1, 30)
@@ -96,7 +106,11 @@ async def inputUrlCheck(message: types.Message, state: FSMContext):
             current_time = datetime.now(moscow_tz)
             future_time = current_time + timedelta(hours=3)
             formatted_future_time = future_time.strftime("%Y-%m-%d %H:%M:%S МСК")
-            await bot.send_message(chat_id= admin_id, text= text)
+            admin_time = current_time.strftime("%Y-%m-%d %H:%M:%S МСК")
+            try:
+                await bot.send_message(chat_id= admin_id, text= f'{admin_time}\n{text}')
+            except:
+                pass
             # Создание сообщения
             mess = f"✅ <b>Вы успешно заняли место в очереди\n\nВаше место: {random_number}\n⌛️ Трейд поступит приблизительно в: {formatted_future_time}. ожидайте</b>"
             await message.answer(mess, parse_mode=types.ParseMode.HTML)
@@ -115,19 +129,32 @@ async def inputUrlCheck(message: types.Message, state: FSMContext):
 
 async def personalAccount(message: types.Message):
     id = message.from_user.id
-
-    chekInfo = await get_user_by_id(id)
-    countInvitations = chekInfo[-1]
-    countScins = chekInfo[-2]
-    limitScins = chekInfo[-3]
+    try:
+        chekInfo = await get_user_by_id(id)
+    except:
+        await message.answer("Произошла ошибка. Перезапустите бота.")
+        return
+    if chekInfo == None:
+        await message.answer("Произошла ошибка. Перезапустите бота")
+        return
+    countInvitations = chekInfo[-3]
+    countScins = chekInfo[-4] + chekInfo[-1]                                                            #https://t.me/skinsfree2024_bot?start=
+    limitScins = chekInfo[-5]
     with open("account.jpg", "rb") as file:
-        await bot.send_photo(chat_id=message.from_user.id, photo=file, caption=personalAccountAnswer(countInvitations, countScins, limitScins, id), parse_mode=types.ParseMode.HTML)
+        await bot.send_photo(chat_id=message.from_user.id, photo=file, caption=personalAccountAnswer(countInvitations, countScins, limitScins, id), parse_mode=types.ParseMode.HTML, reply_markup=url(f"https://t.me/skinsfree2024_bot?start={id}",countScins))
     #await message.answer(text=personalAccountAnswer(countInvitations, countScins, limitScins, id), parse_mode=types.ParseMode.HTML)
 
 async def help(message: types.Message):
     with open("help.jpg", "rb") as file:
         await bot.send_photo(chat_id= message.from_user.id, photo=file, caption=helpText, reply_markup=readmeKeyboard)
     #await message.answer(text = helpText, reply_markup=readmeKeyboard)
+
+async def bonus(message: types.Message):
+    with open("bonus.jpg", "rb") as file:
+        await bot.send_photo(chat_id= message.from_user.id, photo = file, caption="В данный момент спонсора нет")
+    #await message.answer(text = helpText, reply_markup=readmeKeyboard)
+async def support(callback_query: types.CallbackQuery):
+    await bot.send_message(chat_id=callback_query.from_user.id, text="Если у вас возникли какие-либо вопросы или проблемы, не стесняйтесь связаться с нами в нашем чате поддержки: @owner_eatgamesleeps")
 
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(cmdStart, commands=['start'])
@@ -136,3 +163,5 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(personalAccount, text="🤵‍♂️ Личный кабинет")
     dp.register_callback_query_handler(checkFollower, lambda c: c.data == "checkFollow")
     dp.register_message_handler(help, text = "🙋‍♂️Помощь")
+    dp.register_message_handler(bonus, text = "🔪Скин от спонсора")
+    dp.register_callback_query_handler(support, lambda c: c.data == "support")
