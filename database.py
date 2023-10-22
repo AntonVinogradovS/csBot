@@ -19,7 +19,49 @@ def sql_start():
         )
     ''')
     conn.commit()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sponsor (
+            url TEXT
+        )
+    ''')
+async def update_flag2_and_skins_count(user_id):
+    # Проверяем текущее значение flag2
+    cursor.execute('SELECT flag2 FROM users WHERE user_id = ?', (user_id,))
+    current_flag2 = cursor.fetchone()
 
+    if current_flag2 is not None and current_flag2[0] == 0:
+        # Если flag2 равен 0, то обновляем его на 1 и увеличиваем skins_count на 1
+        cursor.execute('UPDATE users SET flag2 = 1, skins_count = skins_count + 1 WHERE user_id = ?', (user_id,))
+        conn.commit()
+        return "Количество доступных скинов увеличилось!"
+    else:
+        return "Вы уже воспользовались этой возможностью"
+
+async def reset_flag2_for_all():
+    # Обнуляем столбец flag2 для всех записей
+    cursor.execute('UPDATE users SET flag2 = 0')
+    conn.commit()
+
+async def count_flag2_equals_1():
+    cursor.execute('SELECT COUNT(*) FROM users WHERE flag2 = 1')
+    count = cursor.fetchone()[0]
+    return count
+
+# Функция для установки ссылки на спонсора
+async def set_sponsor_link(url):
+    cursor.execute('UPDATE sponsor SET url = ? WHERE rowid = 1', (url,))
+    if cursor.rowcount == 0:
+        cursor.execute('INSERT INTO sponsor (url) VALUES (?)', (url,))
+    conn.commit()
+
+# Функция для получения ссылки на спонсора
+async def get_sponsor_link():
+    cursor.execute('SELECT url FROM sponsor')
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        return None
 # Функция для добавления нового пользователя
 async def add_user(user_id=0, referral_id = 0, skins_count=0, skins_received=0, friends_invited=0, flag1=0,flag2=0):
     cursor.execute('''
