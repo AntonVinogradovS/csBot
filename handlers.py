@@ -24,7 +24,8 @@ async def cmdStart(message: types.Message):
         
         if user_status.status != 'member' and user_status.status != 'creator':
             await message.answer("Для продолжения необходимо подписаться на канал.", reply_markup=helpFollowerKeyboard)
-            return
+        else:
+            await message.answer(text=welcomeMessage, reply_markup=firstKeyboard)
     except Exception as e:
         print(e)
         await message.answer("Не удалось проверить подписку на канал.")
@@ -45,7 +46,7 @@ async def cmdStart(message: types.Message):
     #     if referred_by_user_id:
     #         # Свяжите текущего пользователя с пользователем, который пригласил
     #         link_referral_users(referred_by_user_id, message.from_user.id)
-    await message.answer(text=welcomeMessage, reply_markup=firstKeyboard)
+    
 
 async def checkFollower(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
