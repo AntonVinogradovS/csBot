@@ -153,10 +153,8 @@ async def help(message: types.Message):
     #await message.answer(text = helpText, reply_markup=readmeKeyboard)
 
 async def bonus(message: types.Message):
-
-    url_sponsor = await get_sponsor_link()
     with open("bonus.jpg", "rb") as file:
-        await bot.send_photo(chat_id= message.from_user.id, photo = file, caption=sponsorText, reply_markup=kb_url_sponsor(url_sponsor))
+        await bot.send_photo(chat_id= message.from_user.id, photo = file, caption="В данный момент спонсора нет.")
     #await message.answer(text = helpText, reply_markup=readmeKeyboard)
 
 
@@ -167,38 +165,14 @@ async def admin(message:types.Message):
     admin = [5776030599,1313463136]
     if message.from_user.id in admin:
         await message.answer("Вы администратот этого бота", reply_markup=adminKb)
-class FSMUrl(StatesGroup):
-    a0 = State()
-async def cmdStop(message: types.Message, state: FSMContext):
-    await state.finish()
-    await message.answer(text="Регистрация прервана")
-async def newSponsor(message: types.Message):
-    await message.answer("Введите ссылку на нового спонсора")
-    await FSMUrl.a0.set()
 
-async def finishNewSponsor(message: types.Message, state: FSMContext):
-    tmp = message.text
-    async with state.proxy() as data:
-        data['a0'] = tmp
-    await state.finish()
-    await set_sponsor_link(tmp)
-    await reset_flag2_for_all()
 
-async def checkSponsor(callback_query: types.CallbackQuery):
-    res = await update_flag2_and_skins_count(callback_query.from_user.id)
-    await bot.send_message(chat_id=callback_query.from_user.id, text=res)
 
-async def countUser(message: types.Message):
-    res = await count_flag2_equals_1()
-    await bot.send_message(chat_id=message.from_user.id, text=res)
+
 
 
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(cmdStart, commands=['start'])
-    dp.register_message_handler(admin, commands=['admin'])
-    dp.register_message_handler(cmdStop, commands=['stop'], state="*")
-    dp.register_message_handler(newSponsor, text = "Обновить ссылку")
-    dp.register_message_handler(finishNewSponsor, state=FSMUrl.a0)
     dp.register_message_handler(inputUrl, text="🎁 Получить скин")
     dp.register_message_handler(inputUrlCheck, state=FSMAdd.a0, content_types=types.ContentTypes.TEXT)
     dp.register_message_handler(personalAccount, text="🤵‍♂️ Личный кабинет")
@@ -206,5 +180,5 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(help, text = "🙋‍♂️Помощь")
     dp.register_message_handler(bonus, text = "🔪Скин от спонсора")
     dp.register_callback_query_handler(support, lambda c: c.data == "support")
-    dp.register_callback_query_handler(checkSponsor, lambda c: c.data == "checkSponsor")
-    dp.register_message_handler(countUser, text="Количество человек, подписавшихся на спонсора")
+    
+    
