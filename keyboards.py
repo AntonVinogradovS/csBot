@@ -15,14 +15,5 @@ def url(s, count):
         return kb
 
 
-def kb_url_sponsor(url):
-    if url != "СПОНСОРА НЕТ" and url != None:
-        kb = InlineKeyboardMarkup().add(InlineKeyboardButton(text="Спонсор", url=url)).add(InlineKeyboardButton(text="✅Я подписался", callback_data="checkSponsor"))
-    else:
-        kb = InlineKeyboardMarkup().add(InlineKeyboardButton(text="СПОНСОРА НЕТ", callback_data="zero"))
-    return kb
 
-adminKb = ReplyKeyboardMarkup(resize_keyboard=True)\
-    .add(KeyboardButton(text="Обновить ссылку"))\
-    .insert(KeyboardButton(text="Количество человек, подписавшихся на спонсора"))\
     
